@@ -18,6 +18,11 @@ inputs:
   save-logs:
     description: "Whether to save the compiler output to a log file."
     default: "false"
+  clean-cache:
+    description: "Whether to delete GameMaker's configured cache and temp directories before building."
+    default: "true"
+  job-count:
+    description: "Number of CPUs to pass to Igor with /j. Leave empty to let Igor choose."
   gx-package-type:
     description: "If building for Opera GX, the type of package to build."
     default: "OperaGXPackage_Zip"

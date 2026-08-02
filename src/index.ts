@@ -12,6 +12,8 @@ export async function run() {
     const config = core.getInput("config") || "Default";
     const yyc = core.getInput("yyc") === "true";
     const save_logs = core.getInput("save-logs") !== "false";
+    const cleanCache = core.getInput("clean-cache") !== "false";
+    const jobCount = core.getInput("job-count");
     const name = core.getInput("name");
     const gxPackageType = core.getInput("gx-package-type");
 
@@ -31,6 +33,8 @@ export async function run() {
       yyc,
       config,
       name,
+      cleanCache,
+      jobCount,
       gxPackageType: gxPackageType,
     };
 

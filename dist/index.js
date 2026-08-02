@@ -35392,8 +35392,10 @@ const external_process_namespaceObject = __WEBPACK_EXTERNAL_createRequire(import
 
 class Gms2Compile {
     constructor(options) {
+        var _a;
         this.config = "Default";
         this.yyc = true;
+        this.cleanCache = true;
         this.userDir = options.userDir;
         this.projectDir = options.projectDir;
         if (!lib_default().existsSync(this.projectDir)) {
@@ -35410,6 +35412,8 @@ class Gms2Compile {
             options.name ||
                 `${this.baseName}.${Gms2Compile.inferOutputExtension(this.exportPlatform)}`;
         this.yyc = options.yyc;
+        this.cleanCache = (_a = options.cleanCache) !== null && _a !== void 0 ? _a : true;
+        this.jobCount = options.jobCount;
         this.gxPackageType = options.gxPackageType || "OperaGXPackage_Zip";
         this.localSettings = lib_default().readJSONSync((0,external_path_.join)(this.userDir, "local_settings.json"));
         this.targetRuntime = this.localSettings["targetRuntime"];
@@ -35523,10 +35527,14 @@ class Gms2Compile {
         //Clear Cache
         const buildCache = this.localSettings["machine.General Settings.Paths.IDE.AssetCacheFolder"];
         const buildTempDir = this.localSettings["machine.General Settings.Paths.IDE.TempFolder"];
-        if (lib_default().existsSync(buildCache))
-            lib_default().removeSync(buildCache);
-        if (lib_default().existsSync(buildTempDir))
-            lib_default().removeSync(buildTempDir);
+        if (this.cleanCache) {
+            if (lib_default().existsSync(buildCache))
+                lib_default().removeSync(buildCache);
+            if (lib_default().existsSync(buildTempDir))
+                lib_default().removeSync(buildTempDir);
+        }
+        lib_default().ensureDirSync(buildCache);
+        lib_default().ensureDirSync(buildTempDir);
         let baseCommand;
         const args = [];
         const legacyIgor = (0,external_path_.join)(this.runtimePath, "bin/Igor.exe");
@@ -35558,6 +35566,9 @@ class Gms2Compile {
         }
         const buildOptimization = this.yyc ? "YYC" : "VM";
         args.push(`/uf=${this.userDir}`, `/rp=${this.runtimePath}`, `/cache=${buildCache}`, `/temp=${buildTempDir}`, `/of=${(0,external_path_.join)(buildTempDir, this.baseName + ".win")}`, `/tf=${(0,external_path_.join)(this.destinationDir, this.name)}`, `/config=${this.config}`, `/runtime=${buildOptimization}`, "/v", "/ic", "/cr");
+        if (this.jobCount) {
+            args.push(`/j=${this.jobCount}`);
+        }
         let projectDir = `${this.projectDir}`;
         if ((0,external_os_.platform)() === "win32") {
             projectDir = `"${this.projectDir}"`;
@@ -35655,6 +35666,8 @@ async function run() {
         const config = core.getInput("config") || "Default";
         const yyc = core.getInput("yyc") === "true";
         const save_logs = core.getInput("save-logs") !== "false";
+        const cleanCache = core.getInput("clean-cache") !== "false";
+        const jobCount = core.getInput("job-count");
         const name = core.getInput("name");
         const gxPackageType = core.getInput("gx-package-type");
         if (!platform) {
@@ -35673,6 +35686,8 @@ async function run() {
             yyc,
             config,
             name,
+            cleanCache,
+            jobCount,
             gxPackageType: gxPackageType,
         };
         const compiler = new Gms2Compile(options);

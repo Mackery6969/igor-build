@@ -67,6 +67,8 @@ export interface Gms2CompileOptions {
    *
    */
   yyc?: boolean;
+  cleanCache?: boolean;
+  jobCount?: string;
   gxPackageType?:
     | "OperaGXPackage_Zip"
     | "OperaGXPackage_Gamestrip"
@@ -85,6 +87,8 @@ export class Gms2Compile {
   private config = "Default";
   name: string;
   private yyc = true;
+  private cleanCache = true;
+  private jobCount?: string;
   private runtimePath: string;
   private gxPackageType?:
     | "OperaGXPackage_Zip"
@@ -113,6 +117,8 @@ export class Gms2Compile {
       `${this.baseName}.${Gms2Compile.inferOutputExtension(this.exportPlatform)}`;
 
     this.yyc = options.yyc;
+    this.cleanCache = options.cleanCache ?? true;
+    this.jobCount = options.jobCount;
     this.gxPackageType = options.gxPackageType || "OperaGXPackage_Zip";
 
     this.localSettings = fs.readJSONSync(
@@ -259,8 +265,12 @@ export class Gms2Compile {
       "machine.General Settings.Paths.IDE.TempFolder"
     ] as string;
 
-    if (fs.existsSync(buildCache)) fs.removeSync(buildCache);
-    if (fs.existsSync(buildTempDir)) fs.removeSync(buildTempDir);
+    if (this.cleanCache) {
+      if (fs.existsSync(buildCache)) fs.removeSync(buildCache);
+      if (fs.existsSync(buildTempDir)) fs.removeSync(buildTempDir);
+    }
+    fs.ensureDirSync(buildCache);
+    fs.ensureDirSync(buildTempDir);
 
     let baseCommand;
 
@@ -307,6 +317,9 @@ export class Gms2Compile {
       "/ic",
       "/cr",
     );
+    if (this.jobCount) {
+      args.push(`/j=${this.jobCount}`);
+    }
 
     let projectDir = `${this.projectDir}`;
     if (platform() === "win32") {

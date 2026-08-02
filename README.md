@@ -46,6 +46,14 @@ Used in tandem with [bscotch/igor-setup](https://github.com/bscotch/igor-setup),
     # Optional. Default is 'false'.
     save-logs:
 
+    # Whether to delete GameMaker's configured cache and temp directories before building.
+    # Optional. Default is 'true'.
+    clean-cache:
+
+    # Number of CPUs to pass to Igor with /j. Leave empty to let Igor choose.
+    # Optional.
+    job-count:
+
     # The package type for GX.games export. Must be `OperaGXPackage_Zip`, `OperaGXPackage_Gamestrip`, or `OperaGXPackage_Wallpaper`
     # Optional. Default is `OperaGXPackage_Zip`.
     gx-package-type:
